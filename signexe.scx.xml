@@ -1,0 +1,455 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="scx_schema.xsd">
+	<form>
+		<platform>COMMENT</platform>
+		<uniqueid>Screen</uniqueid>
+		<timestamp>0</timestamp>
+		<class/>
+		<classloc/>
+		<baseclass/>
+		<objname/>
+		<parent/>
+		<properties/>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1><![CDATA[VERSION =   3.00]]></reserved1>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LA5</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[dataenvironment]]></class>
+		<classloc/>
+		<baseclass><![CDATA[dataenvironment]]></baseclass>
+		<objname><![CDATA[Dataenvironment]]></objname>
+		<parent/>
+		<properties><![CDATA[Top = 0
+Left = 0
+Width = 0
+Height = 0
+DataSource = .NULL.
+Name = "Dataenvironment"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2><![CDATA[1]]></reserved2>
+		<reserved3/>
+		<reserved4><![CDATA[1]]></reserved4>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LA6</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[form]]></class>
+		<classloc/>
+		<baseclass><![CDATA[form]]></baseclass>
+		<objname><![CDATA[frmSignExe]]></objname>
+		<parent/>
+		<properties><![CDATA[Top = 0
+Left = 0
+Height = 362
+Width = 372
+ShowWindow = 2
+DoCreate = .T.
+OLEDropMode = 1
+Caption = "Sign Exe"
+Name = "frmSignExe"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE Init
+ LPARAMETERS tccaption
+ IF  .NOT. EMPTY(tccaption)
+    this.caption = this.caption+' '+tccaption
+ ENDIF
+ this.txtcertpassword.value = global_ccertpassword
+ this.txtcertpath.value = global_ccertpath
+ this.txtTimeStampServer.Value = global_ctimestampurl
+ this.icon = 'signexe.ico'
+ENDPROC
+PROCEDURE OLEDragDrop
+ LPARAMETERS odataobject, neffect, nbutton, nshift, nxcoord, nycoord
+ this.ondragdrop(odataobject, neffect, nbutton, nshift, nxcoord, nycoord)
+ENDPROC
+PROCEDURE OLEDragOver
+ LPARAMETERS odataobject, neffect, nbutton, nshift, nxcoord, nycoord, nstate
+ this.oledrophasdata = 1
+ENDPROC
+PROCEDURE ondragdrop
+ LPARAMETERS odataobject, neffect, nbutton, nshift, nxcoord, nycoord, tbrepopath
+ LOCAL lafiles(1), lnstep
+ odataobject.getdata(15, @lafiles)
+ FOR lnstep = 1 TO ALEN(lafiles, 1)
+    this.signexe(lafiles(m.lnstep))
+ ENDFOR
+ENDPROC
+PROCEDURE signexe
+ LPARAMETERS tcexecutable
+ LOCAL lcsigntext, lccertificate, lcpassword, loshell, looutput,lcTimeStamp
+ IF EMPTY(tcexecutable)
+    tcexecutable = ADDBS(this.txtservertransfer.value)+'CATS'+PADL(TRANSFORM(versionno), 4, '0')+'.exe'
+ ENDIF
+ lccertificate = this.txtcertpath.value
+ lcpassword = this.txtcertpassword.value
+ lctimestamp = this.txtTimestampServer.Value
+ IF EMPTY(lccertificate) .OR. EMPTY(lcpassword)
+    MESSAGEBOX('Cannot sign without Certificate and Password')
+    RETURN .F.
+ ENDIF
+ IF  .NOT. FILE(lccertificate)
+    MESSAGEBOX('Certificate file not found.')
+    RETURN .F.
+ ENDIF
+ TEXT TO lcsigntext TEXTMERGE NOSHOW PRETEXT 0015 FLAGS 3E0
+	sign /f <<m.lcCertificate>> /p <<m.lcPassword>> /tr <<lctimestamp>> "<<tcExecutable>>"
+ ENDTEXT
+ loshell = CREATEOBJECT('Wscript.Shell')
+ looutput = loshell.exec('signtool '+lcsigntext)
+ MESSAGEBOX(looutput.stdout.readall(), 64, 'SignTool Result', 0060000)
+ENDPROC
+PROCEDURE Unload
+ CLEAR EVENTS
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3><![CDATA[*ondragdrop 
+*signexe 
+]]></reserved3>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0OHOI5</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[label]]></class>
+		<classloc/>
+		<baseclass><![CDATA[label]]></baseclass>
+		<objname><![CDATA[Label3]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[Anchor = 15
+Caption = "Drag here"
+Height = 17
+Left = 156
+Top = 204
+Width = 60
+TabIndex = 7
+Name = "Label3"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LA7</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[textbox]]></class>
+		<classloc/>
+		<baseclass><![CDATA[textbox]]></baseclass>
+		<objname><![CDATA[txtCertPath]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[Format = "T"
+Height = 23
+Left = 12
+MaxLength = 255
+TabIndex = 2
+Top = 24
+Width = 348
+Name = "txtCertPath"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE LostFocus
+ global_ccertpath = this.value
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LA8</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[label]]></class>
+		<classloc/>
+		<baseclass><![CDATA[label]]></baseclass>
+		<objname><![CDATA[Label1]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[AutoSize = .T.
+Caption = "Certificate location:"
+Height = 17
+Left = 12
+Top = 7
+Width = 106
+TabIndex = 1
+Name = "Label1"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LA5</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[label]]></class>
+		<classloc/>
+		<baseclass><![CDATA[label]]></baseclass>
+		<objname><![CDATA[Label2]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[AutoSize = .T.
+Caption = "Password:"
+Height = 17
+Left = 12
+Top = 52
+Width = 61
+TabIndex = 3
+Name = "Label2"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LA6</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[textbox]]></class>
+		<classloc/>
+		<baseclass><![CDATA[textbox]]></baseclass>
+		<objname><![CDATA[txtCertPassword]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[Format = "T"
+Height = 23
+Left = 12
+MaxLength = 255
+TabIndex = 4
+Top = 68
+Width = 348
+Name = "txtCertPassword"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE LostFocus
+ global_ccertpassword = this.value
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_44M0O2LAB</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[container]]></class>
+		<classloc/>
+		<baseclass><![CDATA[container]]></baseclass>
+		<objname><![CDATA[cntTarget]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[OLEDropMode = 1
+Anchor = 15
+Top = 154
+Left = 12
+Width = 348
+Height = 200
+BackStyle = 0
+TabIndex = 8
+Name = "cntTarget"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE OLEDragDrop
+ LPARAMETERS odataobject, neffect, nbutton, nshift, nxcoord, nycoord
+ thisform.ondragdrop(odataobject, neffect, nbutton, nshift, nxcoord, nycoord)
+ENDPROC
+PROCEDURE OLEDragOver
+ LPARAMETERS odataobject, neffect, nbutton, nshift, nxcoord, nycoord, nstate
+ this.oledrophasdata = 1
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5S50NP443</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[label]]></class>
+		<classloc/>
+		<baseclass><![CDATA[label]]></baseclass>
+		<objname><![CDATA[Label4]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[AutoSize = .T.
+Caption = "Timestamp server:"
+Height = 17
+Left = 12
+Top = 97
+Width = 105
+TabIndex = 5
+Name = "Label4"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_5S50NP444</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[textbox]]></class>
+		<classloc/>
+		<baseclass><![CDATA[textbox]]></baseclass>
+		<objname><![CDATA[txtTimestampServer]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[Format = "T"
+Height = 23
+Left = 12
+MaxLength = 255
+TabIndex = 6
+Top = 113
+Width = 348
+Name = "txtTimestampServer"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE LostFocus
+global_cTimestampUrl = this.value
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>COMMENT</platform>
+		<uniqueid>RESERVED</uniqueid>
+		<timestamp>0</timestamp>
+		<class/>
+		<classloc/>
+		<baseclass/>
+		<objname/>
+		<parent/>
+		<properties/>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+</VFPData>

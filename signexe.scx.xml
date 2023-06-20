@@ -120,11 +120,19 @@ PROCEDURE signexe
     RETURN .F.
  ENDIF
  TEXT TO lcsigntext TEXTMERGE NOSHOW PRETEXT 0015 FLAGS 3E0
-	sign /f <<m.lcCertificate>> /p <<m.lcPassword>> /tr <<lctimestamp>> "<<tcExecutable>>"
+	sign /f <<m.lcCertificate>> /p <<m.lcPassword>> /fd SHA256 /td sha1 /tr <<lctimestamp>> "<<tcExecutable>>"
  ENDTEXT
  loshell = CREATEOBJECT('Wscript.Shell')
  looutput = loshell.exec('signtool '+lcsigntext)
- MESSAGEBOX(looutput.stdout.readall(), 64, 'SignTool Result', 0060000)
+LOCAL lcOutputError,lcOutputResult
+lcOutputError = loOutput.stderr.ReadAll()
+IF !EMPTY(lcOutputError)
+	MESSAGEBOX(lcOutputError, 16, 'SignTool Error', 0060000)
+ENDIF
+ lcOutputResult = looutput.stdout.readall()
+IF !EMPTY(lcOutputResult)
+	MESSAGEBOX(lcOutputResult, 64, 'SignTool Result', 0060000)
+ENDIF
 ENDPROC
 PROCEDURE Unload
  CLEAR EVENTS

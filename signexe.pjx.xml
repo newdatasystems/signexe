@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="pjx_schema.xsd">
 	<project>
-		<name><![CDATA[signexe.pjx]]></name>
+		<name><![CDATA[SIGNEXE.PJX]]></name>
 		<type>H</type>
 		<id>0</id>
 		<outfile><![CDATA[<Source>]]></outfile>
@@ -20,7 +20,7 @@
 		<ostype/>
 		<oscreator/>
 		<comments/>
-		<reserved1/>
+		<reserved1><![CDATA[SIGNEXE.PJX]]></reserved1>
 		<reserved2/>
 		<sccdata/>
 		<local>true</local>
@@ -40,7 +40,7 @@
 		<encrypt>false</encrypt>
 		<nologo>false</nologo>
 		<cmntstyle>0</cmntstyle>
-		<objrev>0</objrev>
+		<objrev>544</objrev>
 		<devinfo/>
 		<object/>
 		<cpid>1252</cpid>
@@ -84,6 +84,33 @@
 	<project>
 		<name><![CDATA[signexe.ico]]></name>
 		<type>x</type>
+		<id>0</id>
+		<outfile/>
+		<homedir/>
+		<exclude>false</exclude>
+		<mainprog>false</mainprog>
+		<savecode>false</savecode>
+		<debug>false</debug>
+		<encrypt>false</encrypt>
+		<nologo>false</nologo>
+		<cmntstyle>0</cmntstyle>
+		<objrev>0</objrev>
+		<devinfo/>
+		<object/>
+		<cpid>0</cpid>
+		<ostype/>
+		<oscreator/>
+		<comments/>
+		<reserved1/>
+		<reserved2/>
+		<sccdata/>
+		<local>true</local>
+		<key>SIGNEXE</key>
+		<user/>
+	</project>
+	<project>
+		<name><![CDATA[signexe.ico]]></name>
+		<type>i</type>
 		<id>0</id>
 		<outfile/>
 		<homedir/>

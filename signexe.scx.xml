@@ -67,7 +67,7 @@ Name = "Dataenvironment"
 		<parent/>
 		<properties><![CDATA[Top = 0
 Left = 0
-Height = 362
+Height = 384
 Width = 372
 ShowWindow = 2
 DoCreate = .T.
@@ -76,14 +76,32 @@ Caption = "Sign Exe"
 Name = "frmSignExe"
 ]]></properties>
 		<protected/>
-		<methods><![CDATA[PROCEDURE Init
+		<methods><![CDATA[PROCEDURE editmetadata
+LOCAL lcMetadataFile
+IF EMPTY(this.txtMetadataPath.Value)
+	this.txtMetaDataPath = GETFILE([JSON])
+ENDIF
+
+IF EMPTY(This.txtMetadataPath.Value)
+	RETURN .f.
+ENDIF
+
+LOCAL lcFilePath
+lcFilePath = this.txtMetadataPath.Value
+
+loshell = CREATEOBJECT('Wscript.Shell')
+loshell.Run([notepad "]+TRIM(this.txtMetadataPath.Value)+["])
+
+ENDPROC
+PROCEDURE Init
  LPARAMETERS tccaption
  IF  .NOT. EMPTY(tccaption)
     this.caption = this.caption+' '+tccaption
  ENDIF
- this.txtcertpassword.value = global_ccertpassword
- this.txtcertpath.value = global_ccertpath
+ this.txtMetaDataPath.value = global_cMetadataPath
+ this.txtDlibPath.value = global_cDlibPath
  this.txtTimeStampServer.Value = global_ctimestampurl
+ this.txtPauseSeconds.Value = global_cPauseSeconds
  this.icon = 'signexe.ico'
 ENDPROC
 PROCEDURE OLEDragDrop
@@ -103,36 +121,53 @@ PROCEDURE ondragdrop
  ENDFOR
 ENDPROC
 PROCEDURE signexe
- LPARAMETERS tcexecutable
- LOCAL lcsigntext, lccertificate, lcpassword, loshell, looutput,lcTimeStamp
- IF EMPTY(tcexecutable)
-    tcexecutable = ADDBS(this.txtservertransfer.value)+'CATS'+PADL(TRANSFORM(versionno), 4, '0')+'.exe'
- ENDIF
- lccertificate = this.txtcertpath.value
- lcpassword = this.txtcertpassword.value
- lctimestamp = this.txtTimestampServer.Value
- IF EMPTY(lccertificate) .OR. EMPTY(lcpassword)
-    MESSAGEBOX('Cannot sign without Certificate and Password')
-    RETURN .F.
- ENDIF
- IF  .NOT. FILE(lccertificate)
-    MESSAGEBOX('Certificate file not found.')
-    RETURN .F.
- ENDIF
- TEXT TO lcsigntext TEXTMERGE NOSHOW PRETEXT 0015 FLAGS 3E0
-	sign /f <<m.lcCertificate>> /p <<m.lcPassword>> /fd SHA256 /td sha1 /tr <<lctimestamp>> "<<tcExecutable>>"
- ENDTEXT
- loshell = CREATEOBJECT('Wscript.Shell')
- looutput = loshell.exec('signtool '+lcsigntext)
-LOCAL lcOutputError,lcOutputResult
-lcOutputError = loOutput.stderr.ReadAll()
-IF !EMPTY(lcOutputError)
-	MESSAGEBOX(lcOutputError, 16, 'SignTool Error', 0060000)
+LPARAMETERS tcexecutable
+LOCAL lcsigntext, lccertificate, lcpassword, loshell, looutput,lcTimeStamp
+IF EMPTY(tcExecutable)
+	RETURN 
 ENDIF
- lcOutputResult = looutput.stdout.readall()
-IF !EMPTY(lcOutputResult)
-	MESSAGEBOX(lcOutputResult, 64, 'SignTool Result', 0060000)
+*!*	 IF EMPTY(tcexecutable)
+*!*	    tcexecutable = ADDBS(this.txtservertransfer.value)+'CATS'+PADL(TRANSFORM(versionno), 4, '0')+'.exe'
+*!*	 ENDIF
+lcMetadataPath = this.txtMetadataPath.value
+lcDlibPath = this.txtDLibPath.value+'\bin\x64\Azure.CodeSigning.Dlib.dll'
+lctimestamp = this.txtTimestampServer.Value
+IF EMPTY(lcMetadataPath) .OR. EMPTY(lcDlibPath)
+    MESSAGEBOX('Cannot sign without Metadata and Trusted Signing DLib')
+	RETURN .F.
 ENDIF
+IF  .NOT. FILE(lcMetadataPath)
+    MESSAGEBOX('Metadata file not found.')
+    RETURN .F.
+ENDIF
+ 
+IF NOT FILE(lcDlibPath)
+	MESSAGEBOX('Trusted Signing DLib file '+lcDlibPath+' not found.')
+	RETURN .f.
+ENDIF
+ 
+TEXT TO lcsigntext TEXTMERGE NOSHOW PRETEXT 0015 FLAGS 3E0
+	signtool.exe sign /v /debug /fd SHA256 /tr \"<<m.lcTimestamp>>\" /td SHA256 /dlib \"<<lcDlibPath>>\" /dmdf \"<<lcMetadataPath>>\" \"<<tcExecutable>>\";start-sleep <<this.txtPauseSeconds.Value>>
+ENDTEXT
+
+*!*		sign /f <<m.lcCertificate>> /p <<m.lcPassword>> /fd SHA256 /td sha1 /tr <<lctimestamp>> "<<tcExecutable>>"
+
+* the dlib technique seems to only work if run via powershell
+* so we use wscript.shell to call powershell
+* and instead of trying to capture the result, we just have powershell pause for 10 seconds
+
+loshell = CREATEOBJECT('Wscript.Shell')
+
+loshell.run('powershell.exe -command '+lcsigntext)
+*!*	LOCAL lcOutputError,lcOutputResult
+*!*	lcOutputError = loOutput.stderr.ReadAll()
+*!*	IF !EMPTY(lcOutputError)
+*!*		MESSAGEBOX(lcOutputError, 16, 'SignTool Error', 0060000)
+*!*	ENDIF
+*!*	lcOutputResult = looutput.stdout.readall()
+*!*	IF !EMPTY(lcOutputResult)
+*!*		MESSAGEBOX(lcOutputResult, 64, 'SignTool Result', 0060000)
+*!*	ENDIF
 ENDPROC
 PROCEDURE Unload
  CLEAR EVENTS
@@ -145,6 +180,7 @@ ENDPROC
 		<reserved2/>
 		<reserved3><![CDATA[*ondragdrop 
 *signexe 
+*editmetadata 
 ]]></reserved3>
 		<reserved4/>
 		<reserved5/>
@@ -166,9 +202,9 @@ ENDPROC
 Caption = "Drag here"
 Height = 17
 Left = 156
-Top = 204
+Top = 235
 Width = 60
-TabIndex = 7
+TabIndex = 10
 Name = "Label3"
 ]]></properties>
 		<protected/>
@@ -193,7 +229,7 @@ Name = "Label3"
 		<class><![CDATA[textbox]]></class>
 		<classloc/>
 		<baseclass><![CDATA[textbox]]></baseclass>
-		<objname><![CDATA[txtCertPath]]></objname>
+		<objname><![CDATA[txtMetadataPath]]></objname>
 		<parent><![CDATA[frmSignExe]]></parent>
 		<properties><![CDATA[Format = "T"
 Height = 23
@@ -201,12 +237,12 @@ Left = 12
 MaxLength = 255
 TabIndex = 2
 Top = 24
-Width = 348
-Name = "txtCertPath"
+Width = 298
+Name = "txtMetadataPath"
 ]]></properties>
 		<protected/>
 		<methods><![CDATA[PROCEDURE LostFocus
- global_ccertpath = this.value
+ global_cMetadataPath = this.value
 ENDPROC
 ]]></methods>
 		<objcode/>
@@ -232,11 +268,11 @@ ENDPROC
 		<objname><![CDATA[Label1]]></objname>
 		<parent><![CDATA[frmSignExe]]></parent>
 		<properties><![CDATA[AutoSize = .T.
-Caption = "Certificate location:"
+Caption = "JSON metadata location:"
 Height = 17
 Left = 12
 Top = 7
-Width = 106
+Width = 138
 TabIndex = 1
 Name = "Label1"
 ]]></properties>
@@ -265,12 +301,12 @@ Name = "Label1"
 		<objname><![CDATA[Label2]]></objname>
 		<parent><![CDATA[frmSignExe]]></parent>
 		<properties><![CDATA[AutoSize = .T.
-Caption = "Password:"
+Caption = "Trusted Signing DLib Path:"
 Height = 17
 Left = 12
 Top = 52
-Width = 61
-TabIndex = 3
+Width = 149
+TabIndex = 4
 Name = "Label2"
 ]]></properties>
 		<protected/>
@@ -295,20 +331,20 @@ Name = "Label2"
 		<class><![CDATA[textbox]]></class>
 		<classloc/>
 		<baseclass><![CDATA[textbox]]></baseclass>
-		<objname><![CDATA[txtCertPassword]]></objname>
+		<objname><![CDATA[txtDlibPath]]></objname>
 		<parent><![CDATA[frmSignExe]]></parent>
 		<properties><![CDATA[Format = "T"
 Height = 23
 Left = 12
 MaxLength = 255
-TabIndex = 4
+TabIndex = 5
 Top = 68
 Width = 348
-Name = "txtCertPassword"
+Name = "txtDlibPath"
 ]]></properties>
 		<protected/>
 		<methods><![CDATA[PROCEDURE LostFocus
- global_ccertpassword = this.value
+ global_cDlibPath = this.value
 ENDPROC
 ]]></methods>
 		<objcode/>
@@ -335,12 +371,12 @@ ENDPROC
 		<parent><![CDATA[frmSignExe]]></parent>
 		<properties><![CDATA[OLEDropMode = 1
 Anchor = 15
-Top = 154
+Top = 175
 Left = 12
 Width = 348
 Height = 200
 BackStyle = 0
-TabIndex = 8
+TabIndex = 11
 Name = "cntTarget"
 ]]></properties>
 		<protected/>
@@ -368,7 +404,7 @@ ENDPROC
 	</form>
 	<form>
 		<platform>WINDOWS</platform>
-		<uniqueid>_5S50NP443</uniqueid>
+		<uniqueid>_44M0O2LA5</uniqueid>
 		<timestamp>0</timestamp>
 		<class><![CDATA[label]]></class>
 		<classloc/>
@@ -381,7 +417,7 @@ Height = 17
 Left = 12
 Top = 97
 Width = 105
-TabIndex = 5
+TabIndex = 6
 Name = "Label4"
 ]]></properties>
 		<protected/>
@@ -412,7 +448,7 @@ Name = "Label4"
 Height = 23
 Left = 12
 MaxLength = 255
-TabIndex = 6
+TabIndex = 7
 Top = 113
 Width = 348
 Name = "txtTimestampServer"
@@ -420,6 +456,111 @@ Name = "txtTimestampServer"
 		<protected/>
 		<methods><![CDATA[PROCEDURE LostFocus
 global_cTimestampUrl = this.value
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_6WV0LSTI2</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[commandbutton]]></class>
+		<classloc/>
+		<baseclass><![CDATA[commandbutton]]></baseclass>
+		<objname><![CDATA[cmdEditMetadata]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[Top = 22
+Left = 315
+Height = 27
+Width = 49
+Caption = "Edit"
+TabIndex = 3
+Name = "cmdEditMetadata"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE Click
+thisform.EditMetadata()
+ENDPROC
+]]></methods>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_6WV0OZGA2</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[label]]></class>
+		<classloc/>
+		<baseclass><![CDATA[label]]></baseclass>
+		<objname><![CDATA[Label5]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[AutoSize = .T.
+Caption = "Pause after signing:"
+Height = 17
+Left = 12
+Top = 145
+Width = 112
+TabIndex = 8
+Name = "Label5"
+]]></properties>
+		<protected/>
+		<methods/>
+		<objcode/>
+		<ole/>
+		<ole2/>
+		<reserved1/>
+		<reserved2/>
+		<reserved3/>
+		<reserved4/>
+		<reserved5/>
+		<reserved6/>
+		<reserved7/>
+		<reserved8/>
+		<user/>
+	</form>
+	<form>
+		<platform>WINDOWS</platform>
+		<uniqueid>_6WV0OZGA3</uniqueid>
+		<timestamp>0</timestamp>
+		<class><![CDATA[textbox]]></class>
+		<classloc/>
+		<baseclass><![CDATA[textbox]]></baseclass>
+		<objname><![CDATA[txtPauseSeconds]]></objname>
+		<parent><![CDATA[frmSignExe]]></parent>
+		<properties><![CDATA[Alignment = 3
+Value = 5
+Height = 23
+InputMask = "99"
+Left = 130
+TabIndex = 9
+Top = 141
+Width = 35
+Name = "txtPauseSeconds"
+]]></properties>
+		<protected/>
+		<methods><![CDATA[PROCEDURE LostFocus
+global_cPauseSeconds = this.Value
 ENDPROC
 ]]></methods>
 		<objcode/>

@@ -6,10 +6,11 @@ PROCEDURE start
  SET SAFETY OFF
  SET RESOURCE OFF
  _SCREEN.visible = .F.
- PUBLIC global_ccertpath, global_ccertpassword,global_cTimestampUrl
- STORE '' TO global_ccertpath, global_ccertpassword,global_cTimestampUrl
+ PUBLIC global_cMetadataPath,global_cDlibPath,global_cTimestampUrl,global_cPauseSeconds
+ STORE '' TO global_cMetadataPath,global_cDlibPath,global_cTimestampUrl
+ STORE 5 TO global_cPauseSeconds
  start_loadsettings()
- DO FORM signexe WITH '1.1.3'
+ DO FORM signexe WITH '2.0.1'
  READ EVENTS
  start_savesettings()
  QUIT
